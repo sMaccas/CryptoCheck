@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blockchain Address Risk Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .blockchain-form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .risk-output {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .risk-severe {
+            background-color: #ffdddd;
+            border: 1px solid #ff0000;
+        }
+        .risk-high {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+        }
+        .risk-medium {
+            background-color: #d4edda;
+            border: 1px solid #28a745;
+        }
+        .risk-low {
+            background-color: #e9ecef;
+            border: 1px solid #6c757d;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .risk-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .risk-details {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="blockchain-form">
+        <form id="blockchainAddressForm">
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    id="addressInput" 
+                    placeholder="Enter blockchain address" 
+                    required
+                >
+            </div>
+            <button type="submit" class="submit-btn">Check Address Risk</button>
+        </form>
+
+        <div id="riskOutput" class="risk-output" style="display: none;">
+            <div id="riskLabel" class="risk-label"></div>
+            <div id="riskDetails" class="risk-details"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('blockchainAddressForm');
+            const addressInput = document.getElementById('addressInput');
+            const riskOutput = document.getElementById('riskOutput');
+            const riskLabel = document.getElementById('riskLabel');
+            const riskDetails = document.getElementById('riskDetails');
+
+            // Blockchain address validation patterns (same as previous example)
+            const blockchainPatterns = [
+                {
+                    name: 'Ethereum',
+                    regex: /^0x[a-fA-F0-9]{40}$/,
+                    prefix: '0x'
+                },
+                // ... (previous blockchain patterns)
+            ];
+
+            function detectBlockchain(address) {
+                const trimmedAddress = address.trim();
+                const blockchain = blockchainPatterns.find(b => 
+                    (b.prefix && trimmedAddress.startsWith(b.prefix)) && b.regex.test(trimmedAddress)
+                );
+                return blockchain ? blockchain.name : null;
+            }
+
+            // Simulated API response function (replace with actual API call)
+            async function checkAddressRisk(address) {
+                // In a real-world scenario, this would be an actual API call
+                return {
+                    "object": "address_risk_response",
+                    "address": address,
+                    "chain": "eth",
+                    "risk_level": "severe",
+                    "reason": "scam",
+                    "labels": ["scam", "disputed"],
+                    "on_chain_activity": {
+                        "first_transaction_at": Math.floor(Date.now() / 1000)
+                    },
+                    "risk_score": 99.99
+                };
+            }
+
+            // Format timestamp to readable date
+            function formatTimestamp(timestamp) {
+                return new Date(timestamp * 1000).toLocaleString();
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const address = addressInput.value.trim();
+                const blockchain = detectBlockchain(address);
+
+                if (!blockchain) {
+                    alert('Invalid blockchain address');
+                    return;
+                }
+
+                try {
+                    // Simulate API call
+                    const riskData = await checkAddressRisk(address);
+
+                    // Determine risk level and styling
+                    let riskClass = 'risk-low';
+                    if (riskData.risk_level === 'severe') {
+                        riskClass = 'risk-severe';
+                    } else if (riskData.risk_level === 'high') {
+                        riskClass = 'risk-high';
+                    } else if (riskData.risk_level === 'medium') {
+                        riskClass = 'risk-medium';
+                    }
+
+                    // Clear previous styling
+                    riskOutput.className = `risk-output ${riskClass}`;
+
+                    // Populate risk label
+                    riskLabel.textContent = `Risk Level: ${riskData.risk_level.toUpperCase()}`;
+
+                    // Create detailed risk output
+                    riskDetails.innerHTML = `
+                        <p><strong>Address:</strong> ${riskData.address}</p>
+                        <p><strong>Blockchain:</strong> ${riskData.chain.toUpperCase()}</p>
+                        <p><strong>Risk Score:</strong> ${riskData.risk_score.toFixed(2)}</p>
+                        <p><strong>Reason:</strong> ${riskData.reason}</p>
+                        <p><strong>Labels:</strong> ${riskData.labels.join(', ')}</p>
+                        <p><strong>First Transaction:</strong> ${formatTimestamp(riskData.on_chain_activity.first_transaction_at)}</p>
+                    `;
+
+                    // Show risk output
+                    riskOutput.style.display = 'block';
+
+                } catch (error) {
+                    console.error('Error checking address risk:', error);
+                    alert('Failed to check address risk');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
