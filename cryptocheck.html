@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Blockchain Address Risk Simulator</title>
+    <title>Blockchain Address Risk Checker</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f4f4f4;
@@ -32,28 +32,36 @@
             padding: 15px;
             border-radius: 5px;
         }
-        .risk-severe { background-color: #ffdddd; border: 1px solid #ff0000; }
-        .risk-high { background-color: #fff3cd; border: 1px solid #ffc107; }
-        .risk-medium { background-color: #d4edda; border: 1px solid #28a745; }
-        .risk-low { background-color: #e9ecef; border: 1px solid #6c757d; }
-        .submit-btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+        .risk-severe {
+            background-color: #ffdddd;
+            border: 1px solid #ff0000;
         }
-        .cycle-btn {
+        .risk-high {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+        }
+        .risk-medium {
+            background-color: #d4edda;
+            border: 1px solid #28a745;
+        }
+        .risk-low {
+            background-color: #e9ecef;
+            border: 1px solid #6c757d;
+        }
+        .submit-btn, .cycle-btn {
             width: 100%;
             padding: 10px;
-            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             margin-top: 10px;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+        }
+        .cycle-btn {
+            background-color: #007bff;
         }
         .risk-details {
             margin-top: 10px;
@@ -101,51 +109,55 @@
             const riskHistory = document.getElementById('riskHistory');
             const cycleRiskBtn = document.getElementById('cycleRiskBtn');
 
-            // Comprehensive risk scenarios
+            // Scenarios strictly following the original API response structure
             const riskScenarios = [
                 {
-                    risk_level: 'severe',
-                    reason: 'Known Scam Wallet',
-                    labels: ['scam', 'phishing', 'blacklisted'],
-                    risk_score: 99.99,
-                    on_chain_activity: {
-                        first_transaction_at: 1609459200, // Jan 1, 2021
-                        total_transactions: 5,
-                        total_volume: 0.5
-                    }
+                    "object": "address_risk_response",
+                    "address": "0x8878ebb38c617b48630dca8d4af5ab788a3f94c5",
+                    "chain": "eth",
+                    "risk_level": "severe",
+                    "reason": "scam",
+                    "labels": ["scam", "disputed"],
+                    "on_chain_activity": {
+                        "first_transaction_at": 1724317680
+                    },
+                    "risk_score": 99.99
                 },
                 {
-                    risk_level: 'high',
-                    reason: 'Suspicious Transaction Pattern',
-                    labels: ['high-risk', 'mixer', 'tumbler'],
-                    risk_score: 85.50,
-                    on_chain_activity: {
-                        first_transaction_at: 1640995200, // Jan 1, 2022
-                        total_transactions: 50,
-                        total_volume: 10.2
-                    }
+                    "object": "address_risk_response",
+                    "address": "0x8878ebb38c617b48630dca8d4af5ab788a3f94c5",
+                    "chain": "eth",
+                    "risk_level": "high",
+                    "reason": "suspicious activity",
+                    "labels": ["high-risk", "mixer"],
+                    "on_chain_activity": {
+                        "first_transaction_at": 1724317681
+                    },
+                    "risk_score": 85.50
                 },
                 {
-                    risk_level: 'medium',
-                    reason: 'Multiple Flagged Interactions',
-                    labels: ['potential-scam', 'disputed'],
-                    risk_score: 65.25,
-                    on_chain_activity: {
-                        first_transaction_at: 1672531200, // Jan 1, 2023
-                        total_transactions: 200,
-                        total_volume: 25.5
-                    }
+                    "object": "address_risk_response",
+                    "address": "0x8878ebb38c617b48630dca8d4af5ab788a3f94c5",
+                    "chain": "eth",
+                    "risk_level": "medium",
+                    "reason": "multiple interactions",
+                    "labels": ["potential-scam"],
+                    "on_chain_activity": {
+                        "first_transaction_at": 1724317682
+                    },
+                    "risk_score": 65.25
                 },
                 {
-                    risk_level: 'low',
-                    reason: 'Clean Transaction History',
-                    labels: ['verified', 'trusted'],
-                    risk_score: 15.75,
-                    on_chain_activity: {
-                        first_transaction_at: 1704067200, // Jan 1, 2024
-                        total_transactions: 1000,
-                        total_volume: 100.0
-                    }
+                    "object": "address_risk_response",
+                    "address": "0x8878ebb38c617b48630dca8d4af5ab788a3f94c5",
+                    "chain": "eth",
+                    "risk_level": "low",
+                    "reason": "clean history",
+                    "labels": ["verified"],
+                    "on_chain_activity": {
+                        "first_transaction_at": 1724317683
+                    },
+                    "risk_score": 15.75
                 }
             ];
 
@@ -155,7 +167,7 @@
                 return new Date(timestamp * 1000).toLocaleString();
             }
 
-            function displayRiskAssessment(riskData, address) {
+            function displayRiskAssessment(riskData) {
                 // Determine risk level styling
                 let riskClass = 'risk-low';
                 if (riskData.risk_level === 'severe') {
@@ -174,13 +186,13 @@
 
                 // Create detailed risk output
                 riskDetails.innerHTML = `
-                    <p><strong>Address:</strong> ${address}</p>
+                    <p><strong>Object:</strong> ${riskData.object}</p>
+                    <p><strong>Address:</strong> ${riskData.address}</p>
+                    <p><strong>Blockchain:</strong> ${riskData.chain.toUpperCase()}</p>
                     <p><strong>Risk Score:</strong> ${riskData.risk_score.toFixed(2)}</p>
                     <p><strong>Reason:</strong> ${riskData.reason}</p>
                     <p><strong>Labels:</strong> ${riskData.labels.join(', ')}</p>
                     <p><strong>First Transaction:</strong> ${formatTimestamp(riskData.on_chain_activity.first_transaction_at)}</p>
-                    <p><strong>Total Transactions:</strong> ${riskData.on_chain_activity.total_transactions}</p>
-                    <p><strong>Total Volume:</strong> ${riskData.on_chain_activity.total_volume} ETH</p>
                 `;
 
                 // Add to risk history
@@ -199,19 +211,21 @@
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 
-                const address = addressInput.value.trim();
-                
                 // Use first scenario initially
-                displayRiskAssessment(riskScenarios[0], address);
+                displayRiskAssessment(riskScenarios[0]);
             });
 
             cycleRiskBtn.addEventListener('click', () => {
-                const address = addressInput.value.trim();
-                
                 // Cycle through scenarios
                 currentScenarioIndex = (currentScenarioIndex + 1) % riskScenarios.length;
-                displayRiskAssessment(riskScenarios[currentScenarioIndex], address);
+                displayRiskAssessment(riskScenarios[currentScenarioIndex]);
             });
+
+            // Optional: Simulate API call function
+            async function checkAddressRisk(address) {
+                // In a real-world scenario, this would be an actual API call
+                return riskScenarios[0]; // Return first scenario as default
+            }
         });
     </script>
 </body>
